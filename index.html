@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Razin's Client Networking Hub - Professional Business Edition</title>
+    <title>Razin's Client Networking Hub - CRM & Calendar</title>
     <!-- Tailwind CSS Production CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -22,210 +22,282 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen font-sans antialiased selection:bg-indigo-600 selection:text-white">
+<body class="bg-slate-50 text-slate-900 min-h-screen font-sans antialiased selection:bg-indigo-600 selection:text-white flex flex-col md:flex-row">
 
-    <!-- Top Application Header -->
-    <header class="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 transition-all duration-200 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-3 rounded-xl shadow-md shadow-indigo-600/20 text-white flex items-center justify-center">
-                    <i class="fa-solid fa-network-wired text-xl"></i>
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 border-r border-slate-800">
+        <div>
+            <div class="p-6 border-b border-slate-800 flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl text-white shadow-md shadow-indigo-600/30 flex items-center justify-center">
+                    <i class="fa-solid fa-network-wired text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-xl tracking-tight text-slate-900 flex items-center gap-2">
-                        Razin's Client Networking Hub
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">v2.5 PRO</span>
-                    </h1>
-                    <p class="text-xs text-slate-500">Commercial Relationship Tracking, Pipeline Management & Client Analytics</p>
+                    <h1 class="font-bold text-sm tracking-tight text-white">Call Matrix Hub</h1>
+                    <p class="text-[11px] text-slate-400">Telesales & Pipeline CRM</p>
                 </div>
+            </div>
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                    <span>Dashboard & Leads</span>
+                </button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-slate-400 hover:text-white hover:bg-slate-800/60">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    <span>Calendar Tracker</span>
+                </button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-slate-400 px-2 py-1">
+                <span>Active User:</span>
+                <span class="text-white font-semibold">Razin</span>
+            </div>
+            <button onclick="exportData()" class="w-full text-left flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                <i class="fa-solid fa-download text-emerald-400"></i>
+                <span>Export Backup JSON</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+
+        <!-- Top Header -->
+        <header class="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 h-20 px-6 sm:px-8 flex items-center justify-between shadow-xs">
+            <div class="flex items-center space-x-3">
+                <h2 id="header-title" class="font-bold text-xl tracking-tight text-slate-900">Dashboard & Leads Management</h2>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="openAnalyticsModal()" class="hidden sm:flex items-center space-x-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 transition shadow-xs">
-                    <i class="fa-solid fa-chart-pie text-indigo-600"></i>
-                    <span>Insights</span>
+                <button onclick="openModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-md shadow-indigo-600/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Add New Lead</span>
                 </button>
-                <button onclick="exportData()" class="flex items-center space-x-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 transition shadow-xs">
-                    <i class="fa-solid fa-download text-emerald-600"></i>
-                    <span>Export JSON</span>
-                </button>
-                <label class="flex items-center space-x-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 transition shadow-xs cursor-pointer">
-                    <i class="fa-solid fa-upload text-amber-600"></i>
-                    <span>Import</span>
-                    <input type="file" id="import-file" accept=".json" onchange="importData(event)" class="hidden">
-                </label>
+            </div>
+        </header>
+
+        <!-- Tab 1: Dashboard & Leads Table View -->
+        <main id="view-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs">
+                    <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
+                        <span>Total Connections</span>
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-total">0</div>
+                    <div class="mt-2 text-xs text-slate-500"><span class="text-indigo-600 font-semibold">100%</span> Active database records</div>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs">
+                    <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
+                        <span>Active Pipeline</span>
+                        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-bolt text-sm"></i></div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-active">0</div>
+                    <div class="mt-2 text-xs text-slate-500"><span class="text-amber-600 font-semibold">In Progress</span> Outreach stage</div>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs">
+                    <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
+                        <span>Follow-ups Due</span>
+                        <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-calendar-days text-sm"></i></div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-followup">0</div>
+                    <div class="mt-2 text-xs text-slate-500"><span class="text-rose-600 font-semibold">Requires Action</span> Scheduled timeline</div>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs">
+                    <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
+                        <span>Closed / Completed</span>
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-circle-check text-sm"></i></div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-closed">0</div>
+                    <div class="mt-2 text-xs text-slate-500"><span class="text-emerald-600 font-semibold">Successfully</span> Finalized deals</div>
+                </div>
+            </div>
+
+            <!-- Filters Toolbar -->
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col lg:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-1">
+                    <div class="relative flex-1 max-w-lg">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                        </span>
+                        <input type="text" id="search-input" oninput="renderTable()" placeholder="Search by name, company, campaign, position..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition">
+                    </div>
+                    <select id="filter-status" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
+                        <option value="">All Statuses</option>
+                        <option value="New Lead">New Lead</option>
+                        <option value="Urgent Callback">Urgent Callback</option>
+                        <option value="Callback">Callback</option>
+                        <option value="Appointment Fixed">Appointment Fixed</option>
+                        <option value="Not Interested">Not Interested</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+                    <span class="text-xs text-slate-500 font-medium" id="record-count-display">Showing 0 records</span>
+                    <button onclick="resetFilters()" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium px-3 py-2 bg-indigo-50 rounded-lg transition border border-indigo-100">Reset Filters</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                                <th class="p-4 sm:p-5">Name & Position</th>
+                                <th class="p-4 sm:p-5">Company / Type</th>
+                                <th class="p-4 sm:p-5">Campaign</th>
+                                <th class="p-4 sm:p-5">Status</th>
+                                <th class="p-4 sm:p-5">Next Follow-up</th>
+                                <th class="p-4 sm:p-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="client-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="hidden p-16 text-center">
+                    <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-800 mb-1">No leads located</h3>
+                    <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">No matching records found in the database.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tab 2: Calendar Tracker View -->
+        <main id="view-calendar" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900" id="calendar-month-year">August 2026</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Blue dots = lead created • colored dots = scheduled follow-up</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeMonth(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <button onclick="goToCurrentMonth()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">Today</button>
+                        <button onclick="changeMonth(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid Container -->
+                <div class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200 rounded-2xl overflow-hidden text-center text-xs">
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">SUN</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">MON</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">TUE</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">WED</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">THU</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">FRI</div>
+                    <div class="bg-slate-50 py-3 font-semibold text-slate-500">SAT</div>
+                    <div id="calendar-days-grid" class="contents"></div>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs text-slate-600 font-medium">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span> Lead created</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span> New Lead</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span> Urgent Callback</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Callback</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span> Appointment Fixed</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> Not Interested</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Client Detail & Follow-up Timeline Modal -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-id-badge text-lg"></i></div>
+                    <div>
+                        <h3 id="detail-modal-name" class="text-lg font-bold text-slate-900 tracking-tight">Lead Profile</h3>
+                        <p id="detail-modal-company-sub" class="text-xs text-slate-500">Company & Campaign details</p>
+                    </div>
+                </div>
+                <button onclick="closeDetailModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <div><span class="block text-slate-400 uppercase font-semibold mb-1">Email</span><span id="detail-email" class="font-medium text-slate-800 truncate block">-</span></div>
+                <div><span class="block text-slate-400 uppercase font-semibold mb-1">Position</span><span id="detail-position" class="font-medium text-slate-800 truncate block">-</span></div>
+                <div><span class="block text-slate-400 uppercase font-semibold mb-1">Location</span><span id="detail-location" class="font-medium text-slate-800 truncate block">-</span></div>
+                <div><span class="block text-slate-400 uppercase font-semibold mb-1">Created On</span><span id="detail-created" class="font-medium text-slate-800 truncate block">-</span></div>
+            </div>
+
+            <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 space-y-4">
+                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+                    <span>Log Follow-up & Add New Comment</span>
+                </h4>
+                <form id="followup-form" onsubmit="appendFollowup(event)" class="space-y-3">
+                    <input type="hidden" id="detail-client-id">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Next Follow-up Date</label>
+                            <input type="date" id="new-followup-date" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Update Status</label>
+                            <select id="new-followup-status" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
+                                <option value="New Lead">New Lead</option>
+                                <option value="Urgent Callback">Urgent Callback</option>
+                                <option value="Callback">Callback</option>
+                                <option value="Appointment Fixed">Appointment Fixed</option>
+                                <option value="Not Interested">Not Interested</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">New Comment Note</label>
+                        <textarea id="new-followup-comment" rows="2" required class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition resize-none" placeholder="Enter notes from recent call or discussion..."></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Save Update & Append Comment</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Interaction & Comments History</h4>
+                <div id="comments-timeline" class="space-y-2.5 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+
+            <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+                <button onclick="closeDetailModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">Close</button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Application Dashboard Body -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        <!-- Banner / Welcome Notice Section -->
-        <div class="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 border border-indigo-900/20 rounded-2xl p-6 sm:p-8 shadow-xl text-white">
-            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div class="space-y-2">
-                    <div class="inline-flex items-center space-x-2 text-indigo-300 text-xs font-semibold tracking-wider uppercase bg-indigo-500/20 px-3 py-1 rounded-full border border-indigo-400/20">
-                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                        <span>Enterprise System Active</span>
-                    </div>
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, Razin.</h2>
-                    <p class="text-indigo-200/80 text-sm max-w-2xl">
-                        Manage your commercial partnerships, track active corporate outreach pipelines, and ensure upcoming business reviews are executed efficiently.
-                    </p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="openModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl text-sm font-semibold transition shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2.5">
-                        <i class="fa-solid fa-plus-circle text-base"></i>
-                        <span>Add New Client</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Comprehensive Analytics Metric Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <!-- Card 1 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs relative overflow-hidden group hover:border-slate-300 transition">
-                <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
-                    <span>Total Connections</span>
-                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <i class="fa-solid fa-users text-sm"></i>
-                    </div>
-                </div>
-                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-total">0</div>
-                <div class="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                    <span class="text-indigo-600 font-semibold">100%</span> Active database records
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs relative overflow-hidden group hover:border-slate-300 transition">
-                <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
-                    <span>Active Pipeline</span>
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <i class="fa-solid fa-bolt text-sm"></i>
-                    </div>
-                </div>
-                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-active">0</div>
-                <div class="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                    <span class="text-amber-600 font-semibold">In Progress</span> Outreach stage
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs relative overflow-hidden group hover:border-slate-300 transition">
-                <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
-                    <span>Follow-ups Due</span>
-                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                        <i class="fa-solid fa-calendar-days text-sm"></i>
-                    </div>
-                </div>
-                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-followup">0</div>
-                <div class="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                    <span class="text-rose-600 font-semibold">Requires Action</span> Scheduled timeline
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs relative overflow-hidden group hover:border-slate-300 transition">
-                <div class="flex items-center justify-between text-slate-500 text-sm font-medium mb-3">
-                    <span>Closed / Completed</span>
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <i class="fa-solid fa-circle-check text-sm"></i>
-                    </div>
-                </div>
-                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-closed">0</div>
-                <div class="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                    <span class="text-emerald-600 font-semibold">Successfully</span> Finalized deals
-                </div>
-            </div>
-        </div>
-
-        <!-- Controls Toolbar & Filtering Panel -->
-        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-1">
-                <!-- Search Input Bar -->
-                <div class="relative flex-1 max-w-lg">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                    </span>
-                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search by name, company, campaign, position..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition">
-                </div>
-                <!-- Status Filter Dropdown -->
-                <select id="filter-status" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
-                    <option value="">All Statuses</option>
-                    <option value="New Lead">New Lead</option>
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Closed">Closed</option>
-                </select>
-            </div>
-            <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
-                <span class="text-xs text-slate-500 font-medium" id="record-count-display">Showing 0 records</span>
-                <button onclick="resetFilters()" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium px-3 py-2 bg-indigo-50 rounded-lg transition border border-indigo-100">Reset Filters</button>
-            </div>
-        </div>
-
-        <!-- Main Data Table Section -->
-        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                            <th class="p-4 sm:p-5">Name & Position</th>
-                            <th class="p-4 sm:p-5">Company / Type</th>
-                            <th class="p-4 sm:p-5">Campaign</th>
-                            <th class="p-4 sm:p-5">Status</th>
-                            <th class="p-4 sm:p-5">Next Follow-up</th>
-                            <th class="p-4 sm:p-5 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="client-table-body" class="divide-y divide-slate-100 text-sm">
-                        <!-- Rows populated dynamically via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <!-- Empty State Container -->
-            <div id="empty-state" class="hidden p-16 text-center">
-                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                    <i class="fa-solid fa-folder-open"></i>
-                </div>
-                <h3 class="text-base font-semibold text-slate-800 mb-1">No connections located</h3>
-                <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">We couldn't find any business records matching your current filter parameters or search queries.</p>
-                <button onclick="resetFilters()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">Clear Filters</button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Comprehensive Add/Edit Client Modal Dialog matching exact user template requirements -->
+    <!-- Add/Edit Lead Modal -->
     <div id="client-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 relative">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <i class="fa-solid fa-address-card text-lg"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-address-card text-lg"></i></div>
                     <div>
-                        <h3 id="modal-title" class="text-lg font-bold text-slate-900 tracking-tight">Add New Client</h3>
-                        <p class="text-xs text-slate-500">Fill in the complete client profile details</p>
+                        <h3 id="modal-title" class="text-lg font-bold text-slate-900 tracking-tight">Add New Lead</h3>
+                        <p class="text-xs text-slate-500">Fill in the lead profile details</p>
                     </div>
                 </div>
-                <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
+                <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
 
             <form id="client-form" onsubmit="saveClient(event)" class="space-y-4">
                 <input type="hidden" id="client-id">
                 
-                <!-- NAME -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Name</label>
-                    <input type="text" id="input-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Client full name">
+                    <input type="text" id="input-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Lead full name">
                 </div>
 
-                <!-- EMAIL & POSITION -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Email</label>
@@ -233,11 +305,10 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Position</label>
-                        <input type="text" id="input-position" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Marketing Manager">
+                        <input type="text" id="input-position" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Telesales Expert">
                     </div>
                 </div>
 
-                <!-- COMPANY NAME & COMPANY TYPE -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Company Name</label>
@@ -245,37 +316,35 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Company Type</label>
-                        <input type="text" id="input-company-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="type it your way">
+                        <input type="text" id="input-company-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Telesales Company">
                     </div>
                 </div>
 
-                <!-- LOCATION & CAMPAIGN -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Location</label>
-                        <input type="text" id="input-location" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Location">
+                        <input type="text" id="input-location" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Khulna, BD">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Campaign</label>
-                        <input type="text" id="input-campaign" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="which campaign is this for">
+                        <input type="text" id="input-campaign" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. FL-011">
                     </div>
                 </div>
 
-                <!-- COMMENTS -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Comments</label>
-                    <textarea id="input-comments" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition resize-none" placeholder="General notes about this client"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Initial Comment / Notes</label>
+                    <textarea id="input-comments" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition resize-none" placeholder="General notes about this lead"></textarea>
                 </div>
 
-                <!-- STATUS & NEXT FOLLOW-UP DATE -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Status</label>
                         <select id="input-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
                             <option value="New Lead">New Lead</option>
-                            <option value="Active">Active</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Closed">Closed</option>
+                            <option value="Urgent Callback">Urgent Callback</option>
+                            <option value="Callback">Callback</option>
+                            <option value="Appointment Fixed">Appointment Fixed</option>
+                            <option value="Not Interested">Not Interested</option>
                         </select>
                     </div>
                     <div>
@@ -284,70 +353,76 @@
                     </div>
                 </div>
 
-                <!-- LEAD CREATED ON -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Lead Created On</label>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Lead Created Date</label>
                     <input type="date" id="input-created-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
                 </div>
 
-                <!-- Action Buttons matching exact layout -->
                 <div class="flex items-center justify-start space-x-3 pt-4 border-t border-slate-100">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-indigo-600/20">Add Client</button>
+                    <button type="submit" id="modal-submit-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-indigo-600/20">Add Lead</button>
                     <button type="button" onclick="closeModal()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold transition">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Analytics / Insights Modal -->
-    <div id="analytics-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-                        <i class="fa-solid fa-chart-pie text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 tracking-tight">Database Analytics Insights</h3>
-                        <p class="text-xs text-slate-500">Pipeline distribution breakdown</p>
-                    </div>
-                </div>
-                <button onclick="closeAnalyticsModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-4 py-2">
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <span class="text-sm text-slate-600">New Leads Count</span>
-                    <span class="text-sm font-bold text-indigo-600" id="insight-new">0</span>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <span class="text-sm text-slate-600">Active Pipeline Rate</span>
-                    <span class="text-sm font-bold text-amber-600" id="insight-active-rate">0%</span>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <span class="text-sm text-slate-600">Completion Conversion</span>
-                    <span class="text-sm font-bold text-emerald-600" id="insight-closed-rate">0%</span>
-                </div>
-            </div>
-
-            <div class="flex justify-end pt-4 border-t border-slate-100">
-                <button onclick="closeAnalyticsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">Close Insights</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Core Enterprise Application Script Logic -->
+    <!-- Application Script Logic -->
     <script>
-        // Initial LocalStorage Data Seed or Retrieval with updated fields matching the design
         let clients = JSON.parse(localStorage.getItem('razin_hub_clients')) || [
-            { id: 1, name: 'Jonathan Miller', email: 'j.miller@apexglobal.com', position: 'Marketing Manager', company: 'Apex Global Solutions', companyType: 'Corporate', location: 'New York, US', campaign: 'Q3 Enterprise Outreach', comments: 'Key contact for upcoming expansion strategies.', status: 'Active', date: '2026-08-15', createdDate: '2026-08-01' },
-            { id: 2, name: 'Sarah Jenkins', email: 'sarah@stellarventures.io', position: 'Director of Partnerships', company: 'Stellar Ventures', companyType: 'Startup', location: 'London, UK', campaign: 'SaaS Integration Hub', comments: 'Reviewing contract terms and milestones.', status: 'New Lead', date: '2026-08-20', createdDate: '2026-08-03' }
+            { 
+                id: 1, 
+                name: 'Syed Almas Uddin Razin', 
+                email: 'razin@callmatrix.com', 
+                position: 'Telesales Expert', 
+                company: 'Call Matrix', 
+                companyType: 'Telesales Company', 
+                location: 'Khulna, BD', 
+                campaign: 'FL-011', 
+                comments: 'Initial outreach consultation completed successfully.', 
+                status: 'New Lead', 
+                date: '2026-08-05', 
+                createdDate: '2026-08-03',
+                history: [
+                    { date: '2026-08-03', status: 'New Lead', comment: 'Initial outreach consultation completed successfully.' }
+                ]
+            }
         ];
+
+        clients.forEach(c => {
+            if (!c.history) {
+                c.history = [{ date: c.createdDate || '2026-08-03', status: c.status, comment: c.comments || 'Initial entry.' }];
+            }
+        });
+
+        let currentCalendarYear = 2026;
+        let currentCalendarMonth = 7; // August (0-indexed)
 
         function saveToStorage() {
             localStorage.setItem('razin_hub_clients', JSON.stringify(clients));
+        }
+
+        function switchTab(tab) {
+            const dash = document.getElementById('view-dashboard');
+            const cal = document.getElementById('view-calendar');
+            const navDash = document.getElementById('nav-dashboard');
+            const navCal = document.getElementById('nav-calendar');
+            const title = document.getElementById('header-title');
+
+            if (tab === 'dashboard') {
+                dash.classList.remove('hidden');
+                cal.classList.add('hidden');
+                navDash.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition bg-indigo-600 text-white shadow-md shadow-indigo-600/20";
+                navCal.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+                title.innerText = "Dashboard & Leads Management";
+                renderTable();
+            } else {
+                dash.classList.add('hidden');
+                cal.classList.remove('hidden');
+                navCal.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition bg-indigo-600 text-white shadow-md shadow-indigo-600/20";
+                navDash.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+                title.innerText = "Interactive Calendar & Follow-up Tracker";
+                renderCalendar();
+            }
         }
 
         function renderTable() {
@@ -361,7 +436,7 @@
                 const matchesSearch = (c.name && c.name.toLowerCase().includes(search)) || 
                                       (c.email && c.email.toLowerCase().includes(search)) || 
                                       (c.company && c.company.toLowerCase().includes(search)) || 
-                                      (c.campaign && c.campaign.toLowerCase().includes(search)) ||
+                                      (c.campaign && c.campaign.toLowerCase().includes(search)) || 
                                       (c.position && c.position.toLowerCase().includes(search));
                 const matchesStatus = statusFilter === "" || c.status === statusFilter;
                 return matchesSearch && matchesStatus;
@@ -377,15 +452,19 @@
                 filtered.forEach(c => {
                     let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
                     if (c.status === 'New Lead') badgeColor = 'bg-indigo-50 text-indigo-700 border-indigo-200';
-                    if (c.status === 'Active') badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
-                    if (c.status === 'Pending') badgeColor = 'bg-purple-50 text-purple-700 border-purple-200';
-                    if (c.status === 'Closed') badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    if (c.status === 'Urgent Callback') badgeColor = 'bg-rose-50 text-rose-700 border-rose-200';
+                    if (c.status === 'Callback') badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+                    if (c.status === 'Appointment Fixed') badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    if (c.status === 'Not Interested') badgeColor = 'bg-slate-100 text-slate-600 border-slate-300';
 
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition group">
+                        <tr class="hover:bg-slate-50/80 transition group cursor-pointer" onclick="openDetailModal(${c.id})">
                             <td class="p-4 sm:p-5 font-medium text-slate-900">
-                                <div class="font-bold text-slate-900 group-hover:text-indigo-600 transition">${escapeHtml(c.name)}</div>
-                                <div class="text-xs text-slate-500 mt-0.5">${escapeHtml(c.position || 'No position specified')}</div>
+                                <div class="font-bold text-slate-900 group-hover:text-indigo-600 transition flex items-center gap-2">
+                                    <span>${escapeHtml(c.name)}</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-indigo-600"></i>
+                                </div>
+                                <div class="text-xs text-slate-500 mt-0.5">${escapeHtml(c.position || 'No position')}</div>
                             </td>
                             <td class="p-4 sm:p-5">
                                 <div class="text-slate-800 font-medium text-xs">${escapeHtml(c.company || 'Independent')}</div>
@@ -396,9 +475,9 @@
                             </td>
                             <td class="p-4 sm:p-5"><span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${c.status}</span></td>
                             <td class="p-4 sm:p-5 text-slate-600 text-xs"><i class="fa-regular fa-calendar mr-1.5 text-slate-400"></i>${c.date || 'Not set'}</td>
-                            <td class="p-4 sm:p-5 text-right space-x-1">
-                                <button onclick="openModal(${c.id})" title="Edit Connection" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition inline-flex items-center justify-center"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
-                                <button onclick="deleteClient(${c.id})" title="Delete Connection" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition inline-flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
+                            <td class="p-4 sm:p-5 text-right space-x-1" onclick="event.stopPropagation()">
+                                <button onclick="openModal(${c.id})" title="Edit Lead" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition inline-flex items-center justify-center"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                                <button onclick="deleteClient(${c.id})" title="Delete Lead" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition inline-flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
                             </td>
                         </tr>
                     `;
@@ -409,20 +488,160 @@
 
         function updateStats() {
             const total = clients.length;
-            const active = clients.filter(c => c.status === 'Active' || c.status === 'New Lead').length;
+            const active = clients.filter(c => c.status !== 'Closed' && c.status !== 'Not Interested').length;
             const followup = clients.filter(c => c.date && new Date(c.date) >= new Date()).length;
-            const closed = clients.filter(c => c.status === 'Closed').length;
+            const closed = clients.filter(c => c.status === 'Appointment Fixed').length;
 
             document.getElementById('stat-total').innerText = total;
             document.getElementById('stat-active').innerText = active;
             document.getElementById('stat-followup').innerText = followup;
             document.getElementById('stat-closed').innerText = closed;
+        }
 
-            // Analytics Modal values
-            const newLeads = clients.filter(c => c.status === 'New Lead').length;
-            document.getElementById('insight-new').innerText = newLeads;
-            document.getElementById('insight-active-rate').innerText = total ? Math.round((active / total) * 100) + '%' : '0%';
-            document.getElementById('insight-closed-rate').innerText = total ? Math.round((closed / total) * 100) + '%' : '0%';
+        function renderCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('calendar-month-year').innerText = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
+
+            const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+            const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+            const grid = document.getElementById('calendar-days-grid');
+            grid.innerHTML = '';
+
+            // Blank padding for previous month days
+            for (let i = 0; i < firstDayIndex; i++) {
+                grid.innerHTML += `<div class="bg-slate-50/50 min-h-[110px] p-2 border-b border-r border-slate-200"></div>`;
+            }
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Find items created on this day or with follow-up on this day
+                const createdLeads = clients.filter(c => c.createdDate === dayStr);
+                const followupsDue = clients.filter(c => c.date === dayStr);
+
+                let isToday = (dayStr === todayStr);
+
+                let dotsHtml = '';
+                createdLeads.forEach(() => {
+                    dotsHtml += `<span class="w-2 h-2 rounded-full bg-blue-600 inline-block" title="Lead Created"></span>`;
+                });
+                followupsDue.forEach(c => {
+                    let dotColor = 'bg-indigo-500';
+                    if (c.status === 'Urgent Callback') dotColor = 'bg-rose-600';
+                    if (c.status === 'Callback') dotColor = 'bg-amber-500';
+                    if (c.status === 'Appointment Fixed') dotColor = 'bg-emerald-600';
+                    if (c.status === 'Not Interested') dotColor = 'bg-slate-400';
+                    dotsHtml += `<span class="w-2 h-2 rounded-full ${dotColor} inline-block" title="${c.name} - ${c.status}"></span>`;
+                });
+
+                grid.innerHTML += `
+                    <div class="bg-white min-h-[110px] p-2.5 border-b border-r border-slate-200 flex flex-col justify-between hover:bg-slate-50 transition">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold ${isToday ? 'bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : 'text-slate-700'}">${day}</span>
+                            ${followupsDue.length > 0 ? `<span class="text-[10px] bg-indigo-50 text-indigo-600 font-bold px-1.5 py-0.5 rounded">${followupsDue.length} due</span>` : ''}
+                        </div>
+                        <div class="space-y-1 my-1 text-left overflow-y-auto max-h-16">
+                            ${followupsDue.map(c => `<div class="text-[10px] truncate bg-slate-100 hover:bg-indigo-50 px-1.5 py-0.5 rounded text-slate-700 cursor-pointer" onclick="openDetailModal(${c.id})">${escapeHtml(c.name)}</div>`).join('')}
+                        </div>
+                        <div class="flex items-center justify-center gap-1 flex-wrap pt-1">
+                            ${dotsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function changeMonth(direction) {
+            currentCalendarMonth += direction;
+            if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0;
+                currentCalendarYear++;
+            } else if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11;
+                currentCalendarYear--;
+            }
+            renderCalendar();
+        }
+
+        function goToCurrentMonth() {
+            const now = new Date();
+            currentCalendarYear = now.getFullYear();
+            currentCalendarMonth = now.getMonth();
+            renderCalendar();
+        }
+
+        function openDetailModal(id) {
+            const c = clients.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('detail-client-id').value = c.id;
+            document.getElementById('detail-modal-name').innerText = c.name;
+            document.getElementById('detail-modal-company-sub').innerText = `${c.company || 'Independent'} • Campaign: ${c.campaign || 'General'}`;
+            document.getElementById('detail-email').innerText = c.email || 'N/A';
+            document.getElementById('detail-position').innerText = c.position || 'N/A';
+            document.getElementById('detail-location').innerText = c.location || 'N/A';
+            document.getElementById('detail-created').innerText = c.createdDate || 'N/A';
+
+            document.getElementById('new-followup-date').value = c.date || '';
+            document.getElementById('new-followup-status').value = c.status || 'New Lead';
+            document.getElementById('new-followup-comment').value = '';
+
+            const timelineContainer = document.getElementById('comments-timeline');
+            timelineContainer.innerHTML = '';
+            
+            if (c.history && c.history.length > 0) {
+                [...c.history].reverse().forEach(h => {
+                    timelineContainer.innerHTML += `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs space-y-1 shadow-2xs">
+                            <div class="flex items-center justify-between text-slate-400">
+                                <span class="font-semibold text-indigo-600"><i class="fa-regular fa-calendar-check mr-1"></i>${h.date}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-100 text-slate-600 font-medium">${h.status}</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed">${escapeHtml(h.comment)}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                timelineContainer.innerHTML = `<p class="text-xs text-slate-400 italic p-2">No interaction history notes recorded yet.</p>`;
+            }
+
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function appendFollowup(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('detail-client-id').value);
+            const newDate = document.getElementById('new-followup-date').value;
+            const newStatus = document.getElementById('new-followup-status').value;
+            const newComment = document.getElementById('new-followup-comment').value.trim();
+
+            const c = clients.find(item => item.id === id);
+            if (c) {
+                c.date = newDate;
+                c.status = newStatus;
+                c.comments = newComment;
+
+                if (!c.history) c.history = [];
+                c.history.push({
+                    date: new Date().toISOString().slice(0, 10),
+                    status: newStatus,
+                    comment: newComment
+                });
+
+                saveToStorage();
+                renderTable();
+                openDetailModal(id);
+            }
         }
 
         function openModal(id = null) {
@@ -431,7 +650,8 @@
             modal.classList.add('flex');
 
             if (id) {
-                document.getElementById('modal-title').innerText = 'Edit Client Record';
+                document.getElementById('modal-title').innerText = 'Edit Lead Record';
+                document.getElementById('modal-submit-btn').innerText = 'Save Changes';
                 const c = clients.find(item => item.id === id);
                 if (c) {
                     document.getElementById('client-id').value = c.id;
@@ -448,10 +668,10 @@
                     document.getElementById('input-created-date').value = c.createdDate || new Date().toISOString().slice(0, 10);
                 }
             } else {
-                document.getElementById('modal-title').innerText = 'Add New Client';
+                document.getElementById('modal-title').innerText = 'Add New Lead';
+                document.getElementById('modal-submit-btn').innerText = 'Add Lead';
                 document.getElementById('client-form').reset();
                 document.getElementById('client-id').value = '';
-                // Auto-fill today's date for lead created field
                 document.getElementById('input-created-date').value = new Date().toISOString().slice(0, 10);
             }
         }
@@ -462,44 +682,51 @@
             modal.classList.remove('flex');
         }
 
-        function openAnalyticsModal() {
-            const modal = document.getElementById('analytics-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            updateStats();
-        }
-
-        function closeAnalyticsModal() {
-            const modal = document.getElementById('analytics-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
         function saveClient(e) {
             e.preventDefault();
             const id = document.getElementById('client-id').value;
-            const data = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('input-name').value.trim(),
-                email: document.getElementById('input-email').value.trim(),
-                position: document.getElementById('input-position').value.trim(),
-                company: document.getElementById('input-company').value.trim(),
-                companyType: document.getElementById('input-company-type').value.trim(),
-                location: document.getElementById('input-location').value.trim(),
-                campaign: document.getElementById('input-campaign').value.trim(),
-                comments: document.getElementById('input-comments').value.trim(),
-                status: document.getElementById('input-status').value,
-                date: document.getElementById('input-date').value,
-                createdDate: document.getElementById('input-created-date').value
-            };
+            const name = document.getElementById('input-name').value.trim();
+            const email = document.getElementById('input-email').value.trim();
+            const position = document.getElementById('input-position').value.trim();
+            const company = document.getElementById('input-company').value.trim();
+            const companyType = document.getElementById('input-company-type').value.trim();
+            const location = document.getElementById('input-location').value.trim();
+            const campaign = document.getElementById('input-campaign').value.trim();
+            const comments = document.getElementById('input-comments').value.trim();
+            const status = document.getElementById('input-status').value;
+            const date = document.getElementById('input-date').value;
+            const createdDate = document.getElementById('input-created-date').value;
 
             if (id) {
                 const index = clients.findIndex(c => c.id === parseInt(id));
                 if (index !== -1) {
-                    clients[index] = data;
+                    clients[index].name = name;
+                    clients[index].email = email;
+                    clients[index].position = position;
+                    clients[index].company = company;
+                    clients[index].companyType = companyType;
+                    clients[index].location = location;
+                    clients[index].campaign = campaign;
+                    clients[index].status = status;
+                    clients[index].date = date;
+                    clients[index].createdDate = createdDate;
+                    if (comments && comments !== clients[index].comments) {
+                        clients[index].comments = comments;
+                        clients[index].history.push({
+                            date: new Date().toISOString().slice(0, 10),
+                            status: status,
+                            comment: comments
+                        });
+                    }
                 }
             } else {
-                clients.push(data);
+                clients.push({
+                    id: Date.now(),
+                    name, email, position, company, companyType, location, campaign, comments, status, date, createdDate,
+                    history: [
+                        { date: createdDate || new Date().toISOString().slice(0, 10), status: status, comment: comments || 'Initial lead created.' }
+                    ]
+                });
             }
 
             saveToStorage();
@@ -508,7 +735,7 @@
         }
 
         function deleteClient(id) {
-            if (confirm('Are you certain you want to remove this client record?')) {
+            if (confirm('Are you certain you want to remove this lead record?')) {
                 clients = clients.filter(c => c.id !== id);
                 saveToStorage();
                 renderTable();
@@ -531,34 +758,11 @@
             downloadAnchor.remove();
         }
 
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (Array.isArray(parsed)) {
-                        clients = parsed;
-                        saveToStorage();
-                        renderTable();
-                        alert('Database successfully imported and synchronized!');
-                    } else {
-                        alert('Invalid JSON backup structure format.');
-                    }
-                } catch (err) {
-                    alert('Error parsing uploaded JSON file.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
         function escapeHtml(text) {
             if (!text) return '';
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Initialize table render on startup
         renderTable();
     </script>
 </body>
