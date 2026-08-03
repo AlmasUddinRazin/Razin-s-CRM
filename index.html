@@ -34,7 +34,7 @@
                 <div>
                     <h1 class="font-bold text-xl tracking-tight text-slate-900 flex items-center gap-2">
                         Razin's Client Networking Hub
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">v2.4 PRO</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">v2.5 PRO</span>
                     </h1>
                     <p class="text-xs text-slate-500">Commercial Relationship Tracking, Pipeline Management & Client Analytics</p>
                 </div>
@@ -150,21 +150,15 @@
                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-sm"></i>
                     </span>
-                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search by client name, email, company, or notes..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition">
+                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search by name, company, campaign, position..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition">
                 </div>
                 <!-- Status Filter Dropdown -->
                 <select id="filter-status" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
                     <option value="">All Statuses</option>
+                    <option value="New Lead">New Lead</option>
                     <option value="Active">Active</option>
                     <option value="Pending">Pending</option>
                     <option value="Closed">Closed</option>
-                </select>
-                <!-- Priority Filter Dropdown -->
-                <select id="filter-priority" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
-                    <option value="">All Priorities</option>
-                    <option value="High">High Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="Low">Low Priority</option>
                 </select>
             </div>
             <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
@@ -179,10 +173,10 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                            <th class="p-4 sm:p-5">Client / Organization</th>
-                            <th class="p-4 sm:p-5">Contact Details</th>
+                            <th class="p-4 sm:p-5">Name & Position</th>
+                            <th class="p-4 sm:p-5">Company / Type</th>
+                            <th class="p-4 sm:p-5">Campaign</th>
                             <th class="p-4 sm:p-5">Status</th>
-                            <th class="p-4 sm:p-5">Priority</th>
                             <th class="p-4 sm:p-5">Next Follow-up</th>
                             <th class="p-4 sm:p-5 text-right">Actions</th>
                         </tr>
@@ -204,7 +198,7 @@
         </div>
     </main>
 
-    <!-- Comprehensive Add/Edit Client Modal Dialog -->
+    <!-- Comprehensive Add/Edit Client Modal Dialog matching exact user template requirements -->
     <div id="client-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 relative">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -214,7 +208,7 @@
                     </div>
                     <div>
                         <h3 id="modal-title" class="text-lg font-bold text-slate-900 tracking-tight">Add New Client</h3>
-                        <p class="text-xs text-slate-500">Fill in the commercial relationship details below</p>
+                        <p class="text-xs text-slate-500">Fill in the complete client profile details</p>
                     </div>
                 </div>
                 <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
@@ -222,52 +216,84 @@
                 </button>
             </div>
 
-            <form id="client-form" onsubmit="saveClient(event)" class="space-y-5">
+            <form id="client-form" onsubmit="saveClient(event)" class="space-y-4">
                 <input type="hidden" id="client-id">
                 
+                <!-- NAME -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Client / Business Name *</label>
-                    <input type="text" id="input-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Apex Global Solutions / Stellar Ventures">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Name</label>
+                    <input type="text" id="input-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Client full name">
                 </div>
 
+                <!-- EMAIL & POSITION -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Email / Business Handle</label>
-                        <input type="text" id="input-contact" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="contact@company.com">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Email</label>
+                        <input type="email" id="input-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="name@company.com">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Pipeline Status</label>
-                        <select id="input-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Position</label>
+                        <input type="text" id="input-position" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="e.g. Marketing Manager">
+                    </div>
+                </div>
+
+                <!-- COMPANY NAME & COMPANY TYPE -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Company Name</label>
+                        <input type="text" id="input-company" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Company Name">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Company Type</label>
+                        <input type="text" id="input-company-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="type it your way">
+                    </div>
+                </div>
+
+                <!-- LOCATION & CAMPAIGN -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Location</label>
+                        <input type="text" id="input-location" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="Location">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Campaign</label>
+                        <input type="text" id="input-campaign" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition" placeholder="which campaign is this for">
+                    </div>
+                </div>
+
+                <!-- COMMENTS -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Comments</label>
+                    <textarea id="input-comments" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition resize-none" placeholder="General notes about this client"></textarea>
+                </div>
+
+                <!-- STATUS & NEXT FOLLOW-UP DATE -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Status</label>
+                        <select id="input-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
+                            <option value="New Lead">New Lead</option>
                             <option value="Active">Active</option>
                             <option value="Pending">Pending</option>
                             <option value="Closed">Closed</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Next Follow-up Date</label>
-                        <input type="date" id="input-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Priority Level</label>
-                        <select id="input-priority" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
-                            <option value="Medium">Medium Priority</option>
-                            <option value="High">High Priority</option>
-                            <option value="Low">Low Priority</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Next Follow-Up Date</label>
+                        <input type="date" id="input-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
                     </div>
                 </div>
 
+                <!-- LEAD CREATED ON -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Notes, Objectives & Agreements</label>
-                    <textarea id="input-notes" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 transition resize-none" placeholder="Add specific contract terms, project requirements, or next scheduled touchpoints..."></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Lead Created On</label>
+                    <input type="date" id="input-created-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-600 transition">
                 </div>
 
-                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-xl text-sm font-semibold transition">Cancel</button>
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-semibold transition shadow-lg shadow-indigo-600/30">Save Connection Record</button>
+                <!-- Action Buttons matching exact layout -->
+                <div class="flex items-center justify-start space-x-3 pt-4 border-t border-slate-100">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-indigo-600/20">Add Client</button>
+                    <button type="button" onclick="closeModal()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold transition">Cancel</button>
                 </div>
             </form>
         </div>
@@ -293,8 +319,8 @@
             
             <div class="space-y-4 py-2">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <span class="text-sm text-slate-600">High Priority Contacts</span>
-                    <span class="text-sm font-bold text-rose-600" id="insight-high">0</span>
+                    <span class="text-sm text-slate-600">New Leads Count</span>
+                    <span class="text-sm font-bold text-indigo-600" id="insight-new">0</span>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
                     <span class="text-sm text-slate-600">Active Pipeline Rate</span>
@@ -314,11 +340,10 @@
 
     <!-- Core Enterprise Application Script Logic -->
     <script>
-        // Initial LocalStorage Data Seed or Retrieval
+        // Initial LocalStorage Data Seed or Retrieval with updated fields matching the design
         let clients = JSON.parse(localStorage.getItem('razin_hub_clients')) || [
-            { id: 1, name: 'Apex Global Solutions', contact: 'executives@apexglobal.com', status: 'Active', priority: 'High', date: '2026-08-15', notes: 'Core account management, partnership terms review, and SLA agreement setup.' },
-            { id: 2, name: 'Stellar Ventures', contact: 'ops@stellarventures.io', status: 'Pending', priority: 'Medium', date: '2026-08-20', notes: 'Reviewing proposal terms, contract milestones, and initial onboarding deliverables.' },
-            { id: 3, name: 'Meridian Capital Group', contact: 'relations@meridiancap.com', status: 'Active', priority: 'High', date: '2026-08-10', notes: 'Strategic financial advisory alignment and quarterly pipeline review.' }
+            { id: 1, name: 'Jonathan Miller', email: 'j.miller@apexglobal.com', position: 'Marketing Manager', company: 'Apex Global Solutions', companyType: 'Corporate', location: 'New York, US', campaign: 'Q3 Enterprise Outreach', comments: 'Key contact for upcoming expansion strategies.', status: 'Active', date: '2026-08-15', createdDate: '2026-08-01' },
+            { id: 2, name: 'Sarah Jenkins', email: 'sarah@stellarventures.io', position: 'Director of Partnerships', company: 'Stellar Ventures', companyType: 'Startup', location: 'London, UK', campaign: 'SaaS Integration Hub', comments: 'Reviewing contract terms and milestones.', status: 'New Lead', date: '2026-08-20', createdDate: '2026-08-03' }
         ];
 
         function saveToStorage() {
@@ -328,18 +353,18 @@
         function renderTable() {
             const search = document.getElementById('search-input').value.toLowerCase();
             const statusFilter = document.getElementById('filter-status').value;
-            const priorityFilter = document.getElementById('filter-priority').value;
             const tbody = document.getElementById('client-table-body');
             const emptyState = document.getElementById('empty-state');
             const recordCountDisplay = document.getElementById('record-count-display');
 
             const filtered = clients.filter(c => {
-                const matchesSearch = c.name.toLowerCase().includes(search) || 
-                                      (c.contact && c.contact.toLowerCase().includes(search)) || 
-                                      (c.notes && c.notes.toLowerCase().includes(search));
+                const matchesSearch = (c.name && c.name.toLowerCase().includes(search)) || 
+                                      (c.email && c.email.toLowerCase().includes(search)) || 
+                                      (c.company && c.company.toLowerCase().includes(search)) || 
+                                      (c.campaign && c.campaign.toLowerCase().includes(search)) ||
+                                      (c.position && c.position.toLowerCase().includes(search));
                 const matchesStatus = statusFilter === "" || c.status === statusFilter;
-                const matchesPriority = priorityFilter === "" || c.priority === priorityFilter;
-                return matchesSearch && matchesStatus && matchesPriority;
+                return matchesSearch && matchesStatus;
             });
 
             tbody.innerHTML = '';
@@ -350,24 +375,26 @@
             } else {
                 emptyState.classList.add('hidden');
                 filtered.forEach(c => {
-                    let badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
-                    if (c.status === 'Active') badgeColor = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                    let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
+                    if (c.status === 'New Lead') badgeColor = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                    if (c.status === 'Active') badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+                    if (c.status === 'Pending') badgeColor = 'bg-purple-50 text-purple-700 border-purple-200';
                     if (c.status === 'Closed') badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-
-                    let priorityBadge = 'bg-slate-100 text-slate-700 border-slate-200';
-                    if (c.priority === 'High') priorityBadge = 'bg-rose-50 text-rose-700 border-rose-200';
-                    if (c.priority === 'Medium') priorityBadge = 'bg-amber-50 text-amber-700 border-amber-200';
-                    if (c.priority === 'Low') priorityBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50/80 transition group">
                             <td class="p-4 sm:p-5 font-medium text-slate-900">
                                 <div class="font-bold text-slate-900 group-hover:text-indigo-600 transition">${escapeHtml(c.name)}</div>
-                                <div class="text-xs text-slate-500 truncate max-w-xs mt-0.5">${escapeHtml(c.notes || 'No description notes logged')}</div>
+                                <div class="text-xs text-slate-500 mt-0.5">${escapeHtml(c.position || 'No position specified')}</div>
                             </td>
-                            <td class="p-4 sm:p-5 text-slate-600 text-xs font-mono">${escapeHtml(c.contact || 'N/A')}</td>
+                            <td class="p-4 sm:p-5">
+                                <div class="text-slate-800 font-medium text-xs">${escapeHtml(c.company || 'Independent')}</div>
+                                <div class="text-xs text-slate-400 font-mono">${escapeHtml(c.companyType || 'General')}</div>
+                            </td>
+                            <td class="p-4 sm:p-5">
+                                <span class="text-xs bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600 border border-slate-200 font-medium">${escapeHtml(c.campaign || 'General')}</span>
+                            </td>
                             <td class="p-4 sm:p-5"><span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${c.status}</span></td>
-                            <td class="p-4 sm:p-5"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${priorityBadge}">${c.priority || 'Medium'}</span></td>
                             <td class="p-4 sm:p-5 text-slate-600 text-xs"><i class="fa-regular fa-calendar mr-1.5 text-slate-400"></i>${c.date || 'Not set'}</td>
                             <td class="p-4 sm:p-5 text-right space-x-1">
                                 <button onclick="openModal(${c.id})" title="Edit Connection" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition inline-flex items-center justify-center"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
@@ -382,7 +409,7 @@
 
         function updateStats() {
             const total = clients.length;
-            const active = clients.filter(c => c.status === 'Active').length;
+            const active = clients.filter(c => c.status === 'Active' || c.status === 'New Lead').length;
             const followup = clients.filter(c => c.date && new Date(c.date) >= new Date()).length;
             const closed = clients.filter(c => c.status === 'Closed').length;
 
@@ -392,8 +419,8 @@
             document.getElementById('stat-closed').innerText = closed;
 
             // Analytics Modal values
-            const highPriority = clients.filter(c => c.priority === 'High').length;
-            document.getElementById('insight-high').innerText = highPriority;
+            const newLeads = clients.filter(c => c.status === 'New Lead').length;
+            document.getElementById('insight-new').innerText = newLeads;
             document.getElementById('insight-active-rate').innerText = total ? Math.round((active / total) * 100) + '%' : '0%';
             document.getElementById('insight-closed-rate').innerText = total ? Math.round((closed / total) * 100) + '%' : '0%';
         }
@@ -404,21 +431,28 @@
             modal.classList.add('flex');
 
             if (id) {
-                document.getElementById('modal-title').innerText = 'Edit Connection Record';
+                document.getElementById('modal-title').innerText = 'Edit Client Record';
                 const c = clients.find(item => item.id === id);
                 if (c) {
                     document.getElementById('client-id').value = c.id;
-                    document.getElementById('input-name').value = c.name;
-                    document.getElementById('input-contact').value = c.contact || '';
-                    document.getElementById('input-status').value = c.status;
-                    document.getElementById('input-priority').value = c.priority || 'Medium';
+                    document.getElementById('input-name').value = c.name || '';
+                    document.getElementById('input-email').value = c.email || '';
+                    document.getElementById('input-position').value = c.position || '';
+                    document.getElementById('input-company').value = c.company || '';
+                    document.getElementById('input-company-type').value = c.companyType || '';
+                    document.getElementById('input-location').value = c.location || '';
+                    document.getElementById('input-campaign').value = c.campaign || '';
+                    document.getElementById('input-comments').value = c.comments || '';
+                    document.getElementById('input-status').value = c.status || 'New Lead';
                     document.getElementById('input-date').value = c.date || '';
-                    document.getElementById('input-notes').value = c.notes || '';
+                    document.getElementById('input-created-date').value = c.createdDate || new Date().toISOString().slice(0, 10);
                 }
             } else {
                 document.getElementById('modal-title').innerText = 'Add New Client';
                 document.getElementById('client-form').reset();
                 document.getElementById('client-id').value = '';
+                // Auto-fill today's date for lead created field
+                document.getElementById('input-created-date').value = new Date().toISOString().slice(0, 10);
             }
         }
 
@@ -447,11 +481,16 @@
             const data = {
                 id: id ? parseInt(id) : Date.now(),
                 name: document.getElementById('input-name').value.trim(),
-                contact: document.getElementById('input-contact').value.trim(),
+                email: document.getElementById('input-email').value.trim(),
+                position: document.getElementById('input-position').value.trim(),
+                company: document.getElementById('input-company').value.trim(),
+                companyType: document.getElementById('input-company-type').value.trim(),
+                location: document.getElementById('input-location').value.trim(),
+                campaign: document.getElementById('input-campaign').value.trim(),
+                comments: document.getElementById('input-comments').value.trim(),
                 status: document.getElementById('input-status').value,
-                priority: document.getElementById('input-priority').value,
                 date: document.getElementById('input-date').value,
-                notes: document.getElementById('input-notes').value.trim()
+                createdDate: document.getElementById('input-created-date').value
             };
 
             if (id) {
@@ -469,7 +508,7 @@
         }
 
         function deleteClient(id) {
-            if (confirm('Are you certain you want to remove this networking connection record?')) {
+            if (confirm('Are you certain you want to remove this client record?')) {
                 clients = clients.filter(c => c.id !== id);
                 saveToStorage();
                 renderTable();
@@ -479,7 +518,6 @@
         function resetFilters() {
             document.getElementById('search-input').value = '';
             document.getElementById('filter-status').value = '';
-            document.getElementById('filter-priority').value = '';
             renderTable();
         }
 
