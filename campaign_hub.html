@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Intelligence Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .badge-cyan { background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
+        .badge-green { background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+        .badge-gray { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans leading-normal tracking-normal">
+
+    <!-- Top Navigation / Executive Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-6 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-3 md:mb-0">
+                <div class="bg-blue-600 text-white p-2 rounded-lg shadow">
+                    <i class="fas fa-network-wired text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-900 tracking-tight">CAMPAIGN INTELLIGENCE HUB</h1>
+                    <p class="text-xs text-gray-500">Enterprise Operations & Service Area Directory</p>
+                </div>
+            </div>
+            <!-- Global Search Bar -->
+            <div class="relative w-full md:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="fas fa-search text-gray-400"></i>
+                </span>
+                <input type="text" id="globalSearch" placeholder="Search campaigns, zips, counties, parameters..." 
+                    class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-900 placeholder-gray-400 transition"
+                    onkeyup="filterCampaigns()">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <div class="container mx-auto px-6 py-8">
+        
+        <!-- Live Alert Banner (Remarks Sync) -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-xl mb-6 shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="text-blue-600 text-lg">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-900">Live Remarks & Updates Sync</h3>
+                    <p class="text-sm text-blue-800">VF006 price updated to $385; New Tucson AZ DNCs active; Verify county parameters before scheduling appointments.</p>
+                </div>
+            </div>
+            <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">Synced Live</span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-2 border-b border-gray-200 mb-6 overflow-x-auto pb-2">
+            <button onclick="switchTab('campaigns')" id="btn-campaigns" class="tab-btn px-4 py-2.5 bg-blue-600 text-white font-medium rounded-t-lg transition flex items-center space-x-2 text-sm shadow-sm">
+                <i class="fas fa-layer-group"></i> <span>Service Area Tiers</span>
+            </button>
+            <button onclick="switchTab('dialing')" id="btn-dialing" class="tab-btn px-4 py-2.5 bg-white text-gray-600 hover:bg-gray-100 rounded-t-lg transition flex items-center space-x-2 text-sm border border-gray-200 border-b-0">
+                <i class="fas fa-clock"></i> <span>Dialing Windows</span>
+            </button>
+            <button onclick="switchTab('dnc')" id="btn-dnc" class="tab-btn px-4 py-2.5 bg-white text-gray-600 hover:bg-gray-100 rounded-t-lg transition flex items-center space-x-2 text-sm border border-gray-200 border-b-0">
+                <i class="fas fa-ban"></i> <span>System-Wide DNCs</span>
+            </button>
+            <button onclick="switchTab('categories')" id="btn-categories" class="tab-btn px-4 py-2.5 bg-white text-gray-600 hover:bg-gray-100 rounded-t-lg transition flex items-center space-x-2 text-sm border border-gray-200 border-b-0">
+                <i class="fas fa-tags"></i> <span>Business Index</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: SERVICE AREA CAMPAIGNS -->
+        <div id="tab-campaigns" class="tab-content active space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm gap-2">
+                <div>
+                    <h2 class="text-base font-bold text-gray-800">Active Campaign Directory</h2>
+                    <p class="text-xs text-gray-500">Filtered view of active service territories, pricing tiers, and constraints.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="px-2.5 py-1 badge-cyan font-semibold rounded-md">Cyan: Standard MMP</span>
+                    <span class="px-2.5 py-1 badge-green font-semibold rounded-md">Green: Optimized Route</span>
+                    <span class="px-2.5 py-1 badge-gray font-semibold rounded-md">Gray: No MMP / Structural</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="campaignGrid">
+                <!-- Card 1 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="mm025 fl025 orlando mmp 300">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-cyan text-xs font-bold px-2.5 py-1 rounded-md">CYAN TIER</span>
+                            <span class="text-blue-600 font-mono text-sm font-bold">$300 MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">MM025 / FL025 - ACS Orlando</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> Orange, Osceola, Seminole, Polk</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> 1x/wk min. service. Accept apartment common areas & restaurants.</p>
+                            <p><strong>Obstacles:</strong> Low. Ask rating 1-10 if happy with current service.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-green-600">Active</strong></span>
+                        <span class="text-blue-600 font-medium">Verified Lead Source</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="rg013 fl013 orlando mmp 300">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-green text-xs font-bold px-2.5 py-1 rounded-md">GREEN TIER</span>
+                            <span class="text-blue-600 font-mono text-sm font-bold">$300 MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">RG013 / FL013 - Orlando FL</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> Lake, Orange, Osceola, Polk, Seminole</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> 1 county/day. Overnight service w/ key & alarm code.</p>
+                            <p><strong>Obstacles:</strong> Medium. No restaurants except kitchen floors. No salons/daycares.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-green-600">Active</strong></span>
+                        <span class="text-green-600 font-medium">Optimized Route</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="vf006 fl006 miami broward palm beach 385">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-cyan text-xs font-bold px-2.5 py-1 rounded-md">CYAN TIER</span>
+                            <span class="text-blue-600 font-mono text-sm font-bold">$385 MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">VF006 / FL006 - South Florida</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> Miami-Dade, Broward, Palm Beach</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> Price updated from $360 to $385. Leave 1 hr gap between appts.</p>
+                            <p><strong>Obstacles:</strong> High DNCs (Barbers, Salons, Tattoo, Mechanics).</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-blue-600">Price Updated</strong></span>
+                        <span class="text-blue-600 font-medium">Verified Lead Source</span>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="flsp043 no mmp gray">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-gray text-xs font-bold px-2.5 py-1 rounded-md">GRAY TIER</span>
+                            <span class="text-gray-500 font-mono text-sm font-bold">NO MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">FLSP043 - Orange County</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> ONLY ORANGE COUNTY</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> Schedule 1 week out (Next week setting). 9 AM - 4 PM.</p>
+                            <p><strong>Obstacles:</strong> Manufacturing, Salons, Restaurants, Universities, Logistics.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-gray-700">Active</strong></span>
+                        <span class="text-gray-500 font-medium">Standard Standard</span>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="mr028 fl028 mmp 325 broward">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-green text-xs font-bold px-2.5 py-1 rounded-md">GREEN TIER</span>
+                            <span class="text-blue-600 font-mono text-sm font-bold">$325 MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">MR028 / FL028 - Broward County</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> All of Broward County Florida</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> ONLY EMAIL APPOINTMENTS.</p>
+                            <p><strong>Obstacles:</strong> DNC: Restaurants.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-green-600">Active</strong></span>
+                        <span class="text-green-600 font-medium">Optimized Route</span>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition campaign-card flex flex-col justify-between" data-search="dc002 va002 virginia beach mmp 595">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="badge-cyan text-xs font-bold px-2.5 py-1 rounded-md">CYAN TIER</span>
+                            <span class="text-blue-600 font-mono text-sm font-bold">$595 MMP</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-1">DC002 / VA002 - Virginia Beach</h3>
+                        <p class="text-xs text-gray-500 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i> Virginia Beach Area</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs space-y-1.5 text-gray-700 mb-4 border border-gray-100">
+                            <p><strong>Parameters:</strong> High-value tier. Strict adherence to parameters required.</p>
+                            <p><strong>Obstacles:</strong> Needs quality check after sending 1 lead.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-3 border-t border-gray-100 text-gray-500">
+                        <span>Status: <strong class="text-blue-600">Active</strong></span>
+                        <span class="text-blue-600 font-medium">Verified Lead Source</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: DIALING SYSTEM & TIMING -->
+        <div id="tab-dialing" class="tab-content space-y-6">
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <h2 class="text-base font-bold text-gray-800">Dialing System & Best Time Windows</h2>
+                <p class="text-xs text-gray-500">Optimize outbound call scheduling according to industry vertical availability.</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider border-b border-gray-200">
+                            <th class="p-4 font-semibold">Time Window (EST)</th>
+                            <th class="p-4 font-semibold">Facility Type to Dial</th>
+                            <th class="p-4 font-semibold">Strategy & Best Practices</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 text-gray-700 text-xs md:text-sm">
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4 font-mono text-blue-600 font-bold">9:00 AM – 4:00 PM</td>
+                            <td class="p-4">Daycare, Dental Office, Law Firm, Insurance Firm, Warehouse, Rental Agency, Gyms</td>
+                            <td class="p-4 text-gray-600">Primary power window. Best for reaching decision makers before afternoon schedules.</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4 font-mono text-blue-600 font-bold">11:30 AM – 1:30 PM</td>
+                            <td class="p-4">Medical Spas, Urgent Care, Dental Clinics, Wellness Centers</td>
+                            <td class="p-4 text-gray-600">Ideal for professional office staff availability and lunch hour inquiries.</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4 font-mono text-blue-600 font-bold">2:00 PM – 6:00 PM</td>
+                            <td class="p-4">Gyms, Indoor Entertainment, Trampoline Parks, Bowling Alleys</td>
+                            <td class="p-4 text-gray-600">Late-day shift. Owners or GMs are more accessible after morning rushes. (No shift managers for gyms).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: SYSTEM-WIDE DNCs -->
+        <div id="tab-dnc" class="tab-content space-y-6">
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <h2 class="text-base font-bold text-gray-800">System-Wide DNCs & Appointment Validation Rules</h2>
+                <p class="text-xs text-gray-500">Strict compliance guidelines for lead qualification and restricted verticals.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white border border-red-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-red-700 font-bold text-sm mb-3 flex items-center uppercase tracking-wide">
+                        <i class="fas fa-ban mr-2 text-red-500"></i> Universal Restricted Industries
+                    </h3>
+                    <ul class="list-disc list-inside text-xs space-y-2 text-gray-700">
+                        <li>Strip Clubs</li>
+                        <li>Apartment Clean-outs (Except Stratus MD or The Firm MN)</li>
+                        <li>Auto Repair / Auto Body Shops / Collision Centers</li>
+                        <li>Assisted Living or Skilled Nursing Facilities (Nursing Homes)</li>
+                        <li>Movie Theatres & Cinemas</li>
+                        <li>Government Offices & Storage Facilities</li>
+                        <li>Cleaning / Restoration / Carpet Cleaning Companies</li>
+                        <li>Cell Phone Retail Locations (Verizon, Boost, etc.)</li>
+                        <li>Cosmetology Schools, Barber Shops, Beauty Salons, Nail Salons, Botox Centers, Massage Parlors, Tanning/Tattoo Shops</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-green-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-green-700 font-bold text-sm mb-3 flex items-center uppercase tracking-wide">
+                        <i class="fas fa-check-circle mr-2 text-green-500"></i> Elements of a Valid Appointment
+                    </h3>
+                    <ul class="space-y-2.5 text-xs text-gray-700">
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span>Set up with the right person (DM or direct line).</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span>Genuine interest in receiving cleaning bid + walkthrough allowed.</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span>Clear purpose stated without over-talking or interrupting.</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span><strong>No leading questions</strong> (Ask open-ended questions only).</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span>1x/week minimum frequency & MMP fully covered.</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-600 mr-2 mt-0.5"></i> <span>Word "free & no cost" spoken <strong>no more than once</strong>.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: BUSINESS CATEGORY -->
+        <div id="tab-categories" class="tab-content space-y-6">
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <h2 class="text-base font-bold text-gray-800">Business Category Index</h2>
+                <p class="text-xs text-gray-500">Classified index of target business verticals for outbound campaigns.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition">
+                    <div class="text-blue-600 text-lg mb-2"><i class="fas fa-heartbeat"></i></div>
+                    <h4 class="text-gray-900 font-bold text-sm mb-1.5">Medical & Wellness</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">Dental offices, urgent care, medical spas, prosthetics & orthotics, wellness centers, chiropractic clinics, massage envy.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition">
+                    <div class="text-blue-600 text-lg mb-2"><i class="fas fa-graduation-cap"></i></div>
+                    <h4 class="text-gray-900 font-bold text-sm mb-1.5">Education & Schools</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">Montessori schools, daycares (La Petite, Courtyard), private schools, language/art schools, driving/barber schools.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition">
+                    <div class="text-blue-600 text-lg mb-2"><i class="fas fa-glass-cheers"></i></div>
+                    <h4 class="text-gray-900 font-bold text-sm mb-1.5">Events & Entertainment</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">Banquet halls, wedding venues, indoor playgrounds, golf courses, martial arts studios, party rentals.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition">
+                    <div class="text-blue-600 text-lg mb-2"><i class="fas fa-building"></i></div>
+                    <h4 class="text-gray-900 font-bold text-sm mb-1.5">Industrial & Financial</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">Mortgage companies, banks, manufacturing plants, business complexes, warehouses, truck leasing.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript for Tab Switching and Global Search -->
+    <script>
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+                el.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200', 'border-b-0');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('bg-white', 'text-gray-600', 'border', 'border-gray-200', 'border-b-0');
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+        }
+
+        function filterCampaigns() {
+            let input = document.getElementById('globalSearch').value.toLowerCase();
+            let cards = document.querySelectorAll('.campaign-card');
+
+            cards.forEach(card => {
+                let searchData = card.getAttribute('data-search');
+                if (searchData.includes(input) || card.innerText.toLowerCase().includes(input)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
