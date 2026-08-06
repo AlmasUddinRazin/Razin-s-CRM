@@ -126,7 +126,7 @@
   /* Client table */
   .board{background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);}
   .row{
-    display:grid; grid-template-columns: 1.5fr 1fr 1fr 0.9fr 0.8fr 0.9fr auto;
+    display:grid; grid-template-columns: 1.6fr 1.2fr 1fr 1fr 0.9fr 1fr auto;
     gap:10px; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line-soft);
     cursor:pointer; transition:background .1s;
   }
@@ -270,6 +270,8 @@
 
 <script>
 /* ---------------- STORAGE ---------------- */
+// Uses localStorage (not window.storage) since this file is meant to be
+// downloaded and opened as a real standalone app in your own browser.
 const STORE_KEY = 'franks_crm_clients';
 const SETTINGS_KEY = 'franks_crm_settings';
 let clients = [];
@@ -282,7 +284,7 @@ let calMonth = new Date().getMonth();
 let calYear = new Date().getFullYear();
 let selectedDay = null;
 let openClientId = null;
-let editClientId = null;
+let editClientId = null; // null = adding new
 
 const STATUS_LABELS = {
   new: 'New Lead',
@@ -321,6 +323,7 @@ function persistSettings(){
   catch(e){ console.error('save failed', e); }
 }
 
+// Keep multiple open tabs of the app in sync with each other
 window.addEventListener('storage', (e)=>{
   if(e.key === STORE_KEY){
     try{ clients = e.newValue ? JSON.parse(e.newValue) : []; render(); }catch(err){}
@@ -341,7 +344,7 @@ function showToast(msg){
   toastTimer = setTimeout(()=>t.remove(), 2600);
 }
 
-/* ---------------- ICONS ---------------- */
+/* ---------------- ICONS (inline svg strings) ---------------- */
 const ICONS = {
   grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
@@ -352,10 +355,13 @@ const ICONS = {
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   chevL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>',
-  chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>'
+  chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v13m0 0-4-4m4 4 4-4M4 21h16"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V7m0 0 4 4M12 7 8 11M4 3h16"/></svg>',
 };
 
 function statusClass(s){ return 'status s-'+s; }
+function dotClass(s){ return 'dot d-'+s; }
 
 /* ---------------- RENDER ROOT ---------------- */
 function render(){
@@ -367,6 +373,7 @@ function render(){
       ${currentView==='calendar' ? renderCalendar() : ''}
       ${currentView==='settings' ? renderSettings() : ''}
     </div>
+    ${openClientId!==null || editClientId!==undefined && editClientId!==null && editClientId!=='new' ? '' : ''}
   `;
   if(drawerMode) renderDrawer();
   attachHandlers();
@@ -397,7 +404,7 @@ function filteredClients(){
     if(campaignFilter!=='all' && (c.campaign||'—')!==campaignFilter) return false;
     if(searchQuery){
       const q = searchQuery.toLowerCase();
-      const hay = [c.name,c.email,c.phone,c.company,c.position,c.location,c.campaign].join(' ').toLowerCase();
+      const hay = [c.name,c.email,c.company,c.position,c.location,c.campaign].join(' ').toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -421,7 +428,7 @@ function renderDashboard(){
   </div>
 
   <div class="toolbar">
-    <div class="search">${ICONS.search}<input id="search-input" placeholder="Search name, phone, company, email..." value="${escapeAttr(searchQuery)}"></div>
+    <div class="search">${ICONS.search}<input id="search-input" placeholder="Search name, company, email, campaign..." value="${escapeAttr(searchQuery)}"></div>
     <span class="chip ${statusFilter==='all'?'active':''}" data-status="all">All</span>
     <span class="chip ${statusFilter==='new'?'active':''}" data-status="new">New Lead</span>
     <span class="chip ${statusFilter==='urgent'?'active':''}" data-status="urgent">Urgent Callback</span>
@@ -436,11 +443,11 @@ function renderDashboard(){
   <div class="board">
     <div class="row head">
       <div>Client</div>
-      <div class="hide-mobile">Phone</div>
       <div class="hide-mobile">Company</div>
+      <div class="hide-mobile">Location</div>
       <div class="hide-mobile">Campaign</div>
       <div>Status</div>
-      <div class="hide-mobile">Timing</div>
+      <div class="hide-mobile">Next follow-up</div>
       <div></div>
     </div>
     ${list.length===0 ? `<div class="empty"><div class="big">No clients here yet</div>Add your first lead to start tracking follow-ups.</div>` :
@@ -450,11 +457,11 @@ function renderDashboard(){
           <div class="cell-name">${escapeHtml(c.name||'Unnamed')}</div>
           <div class="cell-sub">${escapeHtml(c.position||'')}${c.position&&c.email?' · ':''}${escapeHtml(c.email||'')}</div>
         </div>
-        <div class="cell hide-mobile mono">${escapeHtml(c.phone||'—')}</div>
         <div class="cell hide-mobile">${escapeHtml(c.company||'—')}<div class="cell-sub">${escapeHtml(c.companyType||'')}</div></div>
+        <div class="cell hide-mobile muted">${escapeHtml(c.location||'—')}</div>
         <div class="cell hide-mobile muted">${escapeHtml(c.campaign||'—')}</div>
         <div><span class="${statusClass(c.status)}">${STATUS_LABELS[c.status]}</span></div>
-        <div class="cell hide-mobile muted">${escapeHtml(c.timing || fmtDate(c.nextFollowUp))}</div>
+        <div class="cell hide-mobile mono muted">${fmtDate(c.nextFollowUp)}</div>
         <div class="actions">
           <button class="icon-btn" data-edit="${c.id}" title="Edit">${ICONS.edit}</button>
           <button class="icon-btn" data-del="${c.id}" title="Delete">${ICONS.trash}</button>
@@ -471,6 +478,7 @@ function renderCalendar(){
   const monthName = first.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
   const todayIso = todayISO();
 
+  // map day -> {created:[], followups:{status:[]}}
   const dayMap = {};
   clients.forEach(c=>{
     if(c.createdDate){
@@ -564,7 +572,7 @@ function renderSettings(){
 
   <div class="settings-card">
     <h3>Google Sheet sync</h3>
-    <p>Paste the Web App URL from a Google Apps Script bound to your sheet. "Push" sends everything here to the sheet. "Pull" replaces what's in the app with what's in the sheet.</p>
+    <p>Paste the Web App URL from a Google Apps Script bound to your sheet (ask Claude for the script if you don't have it set up). "Push" sends everything here to the sheet. "Pull" replaces what's in the app with what's in the sheet — use with care.</p>
     <div class="field"><label>Apps Script Web App URL</label><input id="sheet-url" placeholder="https://script.google.com/macros/s/.../exec" value="${escapeAttr(settings.sheetUrl||'')}"></div>
     <div class="row-btns">
       <button class="btn btn-ghost" id="save-url">Save URL</button>
@@ -575,14 +583,14 @@ function renderSettings(){
 
   <div class="settings-card">
     <h3>CSV export</h3>
-    <p>Downloads every client, phone number, timing, and latest status as a spreadsheet-ready CSV file.</p>
+    <p>No setup needed. Downloads every client and their latest status as a spreadsheet-ready CSV file — open it directly, or import into Google Sheets manually.</p>
     <div class="row-btns"><button class="btn btn-ghost" id="export-csv">Download CSV</button></div>
   </div>
   `;
 }
 
-/* ---------------- DRAWER ---------------- */
-let drawerMode = null;
+/* ---------------- DRAWER (add/edit + detail) ---------------- */
+let drawerMode = null; // 'form' | 'detail'
 let followDraft = { status:'new', comment:'', date:'' };
 
 function openForm(id){
@@ -612,7 +620,7 @@ function renderDrawer(){
 
 function formDrawerHTML(){
   const c = editClientId ? clients.find(x=>x.id===editClientId) : null;
-  const v = c || { name:'', phone:'', email:'', position:'', company:'', companyType:'', location:'', campaign:'', timing:'', comments:'', status:'new', createdDate:todayISO(), nextFollowUp:'' };
+  const v = c || { name:'',email:'',position:'',company:'',companyType:'',location:'',campaign:'',comments:'',status:'new',createdDate:todayISO(),nextFollowUp:'' };
   return `
   <div class="drawer">
     <div class="drawer-head">
@@ -622,12 +630,8 @@ function formDrawerHTML(){
     <div class="drawer-body">
       <div class="field"><label>Name</label><input id="f-name" value="${escapeAttr(v.name)}" placeholder="Client full name"></div>
       <div class="field-row">
-        <div class="field"><label>Phone Number</label><input id="f-phone" value="${escapeAttr(v.phone)}" placeholder="+880 ..."></div>
         <div class="field"><label>Email</label><input id="f-email" value="${escapeAttr(v.email)}" placeholder="name@company.com"></div>
-      </div>
-      <div class="field-row">
         <div class="field"><label>Position</label><input id="f-position" value="${escapeAttr(v.position)}" placeholder="e.g. Marketing Manager"></div>
-        <div class="field"><label>Timing</label><input id="f-timing" value="${escapeAttr(v.timing)}" placeholder="e.g. 3:00 PM / Evening"></div>
       </div>
       <div class="field-row">
         <div class="field"><label>Company Name</label><input id="f-company" value="${escapeAttr(v.company)}"></div>
@@ -635,7 +639,7 @@ function formDrawerHTML(){
       </div>
       <div class="field-row">
         <div class="field"><label>Location</label><input id="f-location" value="${escapeAttr(v.location)}"></div>
-        <div class="field"><label>Campaign</label><input id="f-campaign" value="${escapeAttr(v.campaign)}" placeholder="campaign name"></div>
+        <div class="field"><label>Campaign</label><input id="f-campaign" value="${escapeAttr(v.campaign)}" placeholder="which campaign is this for"></div>
       </div>
       <div class="field"><label>Comments</label><textarea id="f-comments" placeholder="General notes about this client">${escapeHtml(v.comments)}</textarea></div>
       <div class="field-row">
@@ -672,12 +676,8 @@ function detailDrawerHTML(){
 
       <div class="section-label">Details</div>
       <div class="field-row">
-        <div class="field"><label>Phone Number</label><div class="cell mono">${escapeHtml(c.phone||'—')}</div></div>
         <div class="field"><label>Email</label><div class="cell">${escapeHtml(c.email||'—')}</div></div>
-      </div>
-      <div class="field-row">
         <div class="field"><label>Position</label><div class="cell">${escapeHtml(c.position||'—')}</div></div>
-        <div class="field"><label>Timing</label><div class="cell">${escapeHtml(c.timing||'—')}</div></div>
       </div>
       <div class="field-row">
         <div class="field"><label>Company</label><div class="cell">${escapeHtml(c.company||'—')}</div></div>
@@ -771,6 +771,7 @@ function attachHandlers(){
 }
 
 function renderInPlaceDashboard(){
+  // lightweight re-render of just the board+toolbar to keep search input focused
   const main = document.querySelector('.main');
   if(main) main.innerHTML = renderDashboard();
   attachHandlers();
@@ -802,10 +803,8 @@ async function saveClientFromForm(){
   if(!name){ showToast('Name is required.'); return; }
   const data = {
     name,
-    phone: document.getElementById('f-phone').value.trim(),
     email: document.getElementById('f-email').value.trim(),
     position: document.getElementById('f-position').value.trim(),
-    timing: document.getElementById('f-timing').value.trim(),
     company: document.getElementById('f-company').value.trim(),
     companyType: document.getElementById('f-companyType').value.trim(),
     location: document.getElementById('f-location').value.trim(),
@@ -889,11 +888,11 @@ async function pullFromSheet(){
 }
 
 function exportCSV(){
-  const headers = ['Name','Phone','Email','Position','Timing','Company','Company Type','Location','Campaign','Status','Created Date','Next Follow-up','Comments','Follow-up Log'];
+  const headers = ['Name','Email','Position','Company','Company Type','Location','Campaign','Status','Created Date','Next Follow-up','Comments','Follow-up Log'];
   const rows = clients.map(c=>{
     const logStr = (c.followUps||[]).slice().sort((a,b)=>a.date.localeCompare(b.date))
       .map(f=>`${f.date} [${STATUS_LABELS[f.status]}]: ${f.comment||''}`).join(' | ');
-    return [c.name,c.phone,c.email,c.position,c.timing,c.company,c.companyType,c.location,c.campaign,STATUS_LABELS[c.status],c.createdDate,c.nextFollowUp,c.comments,logStr];
+    return [c.name,c.email,c.position,c.company,c.companyType,c.location,c.campaign,STATUS_LABELS[c.status],c.createdDate,c.nextFollowUp,c.comments,logStr];
   });
   const csv = [headers, ...rows].map(r=> r.map(csvEscape).join(',')).join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
