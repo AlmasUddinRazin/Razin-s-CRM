@@ -543,7 +543,6 @@
             const grid = document.getElementById('calendar-days-grid');
             grid.innerHTML = '';
 
-            // Blank padding for previous month days
             for (let i = 0; i < firstDayIndex; i++) {
                 grid.innerHTML += `<div class="bg-slate-50/50 min-h-[110px] p-2 border-b border-r border-slate-200"></div>`;
             }
@@ -553,7 +552,6 @@
             for (let day = 1; day <= totalDays; day++) {
                 const dayStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                // Find items created on this day or with follow-up on this day
                 const createdLeads = clients.filter(c => c.createdDate === dayStr);
                 const followupsDue = clients.filter(c => c.date === dayStr);
 
